@@ -1,7 +1,7 @@
 from edgar import set_identity, Company
 
 # Enter your name and your email address
-set_identity("Jonathan", "kurnathan8868@gmail.com")
+set_identity()
 
 class Fetcher():
     def __init__(self, _ticker):
