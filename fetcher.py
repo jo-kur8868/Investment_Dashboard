@@ -1,24 +1,24 @@
 from edgar import set_identity, Company
+import os
+import pandas as pd
 
 # Enter your name and your email address
 set_identity()
 
-class Fetcher():
-    def __init__(self, _ticker):
-        self.ticker = _ticker
+# Cache directory
+Cache_DIR = "cache"
+os.makedirs(Cache_DIR, exist_ok=True)
 
-    def get_Ticker(self):
-            return self.ticker
+ticker = 'AAPL'
+cache_file = os.path.join(Cache_DIR, f'{ticker.lower()}_income_statement.csv')
 
-    def set_Ticker(self, name):
-        self.ticker = name
+if os.path.exists(cache_file):
+    df = pd.read_csv(cache_file)
+else:
+    company = Company('AAPL')
+    income_stmt = company.get_financials().income_statement()
+    df = income_stmt.to_dataframe()
+    df.to_csv(cache_file, index=False)
 
-    def get_income_stmt(self):
-        company = Company(self.get_Ticker())
-        income_stmt = company.get_financials().income_statement()
-        df = income_stmt.to_dataframe()
-
-        return df.iloc[0].to_dict()
-    
 
 
