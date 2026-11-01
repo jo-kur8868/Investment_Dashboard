@@ -7,6 +7,7 @@ from edgar import set_identity, Company, use_local_storage, download_filings
 
 # Caching and returning dataframes of statements
 def get_statement(ticker):
+    os.makedirs('cache', exist_ok=True)
     cache_dir = Path('cache')
 
     statements = ['income_statement', 'balance_sheet', 'cash_flow']
@@ -32,9 +33,10 @@ def get_statement(ticker):
                     result.append(df)
 
     return result
-        
+
+# Get 10-K and cache 
 def get_tenk(ticker):
-    os.makedirs("filing_library", exist_ok=True)
+    os.makedirs('filing_library', exist_ok=True)
     cache_dir = Path('filing_library')
 
     path = cache_dir / f'{ticker}_10K.md'
@@ -81,26 +83,29 @@ def main():
     conn = sqlite3.connect('companies.db')
     conn.executescript(Path('queries/schema.sql').read_text())
 
-    company_name = 'AAPL'
-    end_period = 'FY 2025'
+    year = 2025
+    company_name = 'SD'
+    periods = [f'FY {year}', f'FY {year-1}',f'FY {year-2}', f'FY {year-3}']
 
     # Get 10-K
     get_tenk(company_name)
 
     # Financial Statements
     financial_stmts = get_statement(company_name)
-    
-    # Income Statement
-    income_entries = get_entries(financial_stmts[0], company_name, end_period)
-    load_entries(conn, 'income_stmt', income_entries)
 
-    # Financial Position
-    balance_entries = get_entries(financial_stmts[1], company_name, end_period)
-    load_entries(conn, 'balance_sheet', balance_entries)
+    # Each FY year in the financials
+    for end_period in periods:
+        # Income Statement
+        income_entries = get_entries(financial_stmts[0], company_name, end_period)
+        load_entries(conn, 'income_stmt', income_entries)
 
-    # Cash Flow Statement
-    cash_flow_entries = get_entries(financial_stmts[2], company_name, end_period)
-    load_entries(conn, 'cash_flow', cash_flow_entries)
+        # Financial Position
+        balance_entries = get_entries(financial_stmts[1], company_name, end_period)
+        load_entries(conn, 'balance_sheet', balance_entries)
+
+        # Cash Flow Statement
+        cash_flow_entries = get_entries(financial_stmts[2], company_name, end_period)
+        load_entries(conn, 'cash_flow', cash_flow_entries)
 
     conn.commit()
 
