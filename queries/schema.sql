@@ -1,9 +1,9 @@
-CREATE TABLE IF NOT EXISTS income_stmt (
+CREATE TABLE IF NOT EXISTS income_statement (
     CompanyName TEXT NOT NULL,
     EndPeriod TEXT NOT NULL,
     ItemKey TEXT NOT NULL,
     ItemVal decimal,
-    PRIMARY KEY (CompanyName, EndPeriod, ItemKey, ItemVal)
+    PRIMARY KEY (CompanyName, EndPeriod, ItemKey)
 );
 
 CREATE TABLE IF NOT EXISTS balance_sheet (
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS balance_sheet (
     EndPeriod TEXT NOT NULL,
     ItemKey TEXT NOT NULL,
     ItemVal decimal,
-    PRIMARY KEY (CompanyName, EndPeriod, ItemKey, ItemVal)
+    PRIMARY KEY (CompanyName, EndPeriod, ItemKey)
 );
 
 CREATE TABLE IF NOT EXISTS cash_flow (
@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS cash_flow (
     EndPeriod TEXT NOT NULL,
     ItemKey TEXT NOT NULL,
     ItemVal decimal,
-    PRIMARY KEY (CompanyName, EndPeriod, ItemKey, ItemVal)
+    PRIMARY KEY (CompanyName, EndPeriod, ItemKey)
 );

@@ -20,7 +20,7 @@ This repository pulls financial statement data for a company (such as income sta
 - `fetcher.py` — main data ingestion script that retrieves financial statements and 10-K filings, and loads them into SQLite
 - `user_interface.py` — simple console interface that runs a sample SQL metric query against the database
 - `queries/schema.sql` — SQLite schema for storing statement data
-- `queries/metrics.sql` — example metrics and analytical SQL queries
+- `queries/metrics/` — one parameterized SQL query per metric
 - `cache/` — cached statement data stored as pickled pandas DataFrames
 - `filing_library/` — saved 10-K markdown files
 - `companies.db` — local SQLite database created by the project
@@ -37,7 +37,7 @@ This repository pulls financial statement data for a company (such as income sta
    - `income_stmt`
    - `balance_sheet`
    - `cash_flow`
-6. SQL queries in `queries/metrics.sql` can be used to calculate ratios such as net margin and other fundamental metrics.
+6. Individual SQL queries in `queries/metrics/` calculate metrics such as net margin and other fundamental metrics. The interface loads and runs only the selected metric.
 
 ## Database schema
 
@@ -58,15 +58,14 @@ The primary key is a combination of company name, period, item name, and value t
 
 ## Example metrics
 
-The project includes sample queries for business ratios, including:
+The project includes one SQL file per metric:
 
-- Net profit margin
-- Return on equity
-- Return on assets
-- Working capital
-- Retained earnings
+- `queries/metrics/profit_margin.sql` — net profit margin
+- `queries/metrics/return_on_equity.sql` — return on equity
+- `queries/metrics/return_on_asset.sql` — return on assets
+- `queries/metrics/working_capital.sql` — working capital
 
-The metric SQL is intentionally easy to extend as you build a broader investment research workflow.
+Each query accepts `:ticker` and `:end_period` parameters. Keeping metrics in separate files lets the application execute only the metric needed; it does not calculate the other metrics. Add a new metric by creating another single-statement SQL file in this directory.
 
 ## Setup
 
@@ -119,7 +118,7 @@ This script:
 python user_interface.py
 ```
 
-This script executes a sample SQL query from `queries/metrics.sql` against the local `companies.db` file and prints the result.
+This script selects a metric from `queries/metrics/`, executes only that SQL query against the local `companies.db`, and prints its result. The selected query receives the ticker and period specified in `user_interface.py`.
 
 ## Notes
 

@@ -7,8 +7,8 @@ from edgar import set_identity, Company, use_local_storage, download_filings
 
 # Caching and returning dataframes of statements
 def get_statement(ticker):
-    os.makedirs('cache', exist_ok=True)
-    cache_dir = Path('cache')
+    os.makedirs('cache/financials', exist_ok=True)
+    cache_dir = Path('cache/financials')
 
     statements = ['income_statement', 'balance_sheet', 'cash_flow']
     result = []
@@ -34,17 +34,17 @@ def get_statement(ticker):
 
     return result
 
-# Get 10-K and cache 
-def get_tenk(ticker):
-    os.makedirs('filing_library', exist_ok=True)
-    cache_dir = Path('filing_library')
+# Get filing forms and cache 
+def get_latest_filing(ticker, form):
+    os.makedirs('cache/filing_library', exist_ok=True)
+    cache_dir = Path('cache/filing_library')
 
-    path = cache_dir / f'{ticker}_10K.md'
+    path = cache_dir / f'{ticker}_{form}.md'
 
     if path.exists():
         return path.read_text(encoding='utf-8')
     
-    filing = Company(ticker).get_filings(form='10-K').latest().markdown()
+    filing = Company(ticker).get_filings(form=form).latest().markdown()
     path.write_text(filing, encoding='utf-8')
     return filing
 
@@ -66,7 +66,7 @@ def load_entries(connection, statement, entries):
     f'''
     INSERT INTO {statement} (CompanyName, EndPeriod, ItemKey, ItemVal)
     VALUES (:CompanyName, :EndPeriod, :ItemKey, :ItemVal)
-    ON CONFLICT(CompanyName, EndPeriod, ItemKey, ItemVal) DO NOTHING
+    ON CONFLICT(CompanyName, EndPeriod, ItemKey) DO NOTHING
     ''',
     entries,
     )
@@ -84,11 +84,11 @@ def main():
     conn.executescript(Path('queries/schema.sql').read_text())
 
     year = 2025
-    company_name = 'SD'
+    company_name = 'ADBE'
     periods = [f'FY {year}', f'FY {year-1}',f'FY {year-2}', f'FY {year-3}']
 
     # Get 10-K
-    get_tenk(company_name)
+    get_latest_filing(company_name, '10-Q')
 
     # Financial Statements
     financial_stmts = get_statement(company_name)
@@ -97,7 +97,7 @@ def main():
     for end_period in periods:
         # Income Statement
         income_entries = get_entries(financial_stmts[0], company_name, end_period)
-        load_entries(conn, 'income_stmt', income_entries)
+        load_entries(conn, 'income_statement', income_entries)
 
         # Financial Position
         balance_entries = get_entries(financial_stmts[1], company_name, end_period)
