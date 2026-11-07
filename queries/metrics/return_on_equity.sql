@@ -4,8 +4,8 @@ SELECT
     ni.EndPeriod,
     ni.ItemVal AS net_income,
     eq.ItemVal As equity,
-    ni.ItemVal * 1.0 / NULLIF(eq.ItemVal, 0) AS roe
-FROM income_stmt ni
+    ni.ItemVal * 100.0 / NULLIF(eq.ItemVal, 0) AS roe
+FROM income_statement ni
 JOIN balance_sheet eq
 ON ni.CompanyName = eq.CompanyName
 AND ni.EndPeriod = ni.EndPeriod

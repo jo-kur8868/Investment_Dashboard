@@ -4,9 +4,9 @@ SELECT
     ni.EndPeriod,
     ni.ItemVal AS net_income,
     rev.ItemVal AS revenue,
-    ni.ItemVal * 1.0 / NULLIF(rev.ItemVal, 0) AS net_margin
-FROM income_stmt ni
-JOIN income_stmt rev
+    ni.ItemVal * 100.0 / NULLIF(rev.ItemVal, 0) AS net_margin
+FROM income_statement ni
+JOIN income_statement rev
 ON ni.CompanyName = rev.CompanyName
 AND ni.EndPeriod = rev.EndPeriod
 WHERE ni.ItemKey = 'NetIncomeLoss'
